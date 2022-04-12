@@ -1,30 +1,63 @@
+// A Java program for a Server
 import java.net.*;
 import java.io.*;
 
-public class DateServer
+public class Server
 {
-	public static void main(String[] args) {
-	 try{
-	   ServerSocket sock = new ServerSocket(6013);
-	   
-	   /* now listen for connections */
-	   while (true) {
-	     Socket client = sock.accept();
-	     
-	     PrintWriter pout = new
-	      PrintWriter(client.getOutputStream(), true);
-	   
-	     /* Write the date to the socket*/
-	     pout.println(new java.util.Date().toString());
-	     
-		
-		/* close the socket and resume*/
-		/*listening for connections */
-		client.close();
+	//initialize socket and input stream
+	private Socket		 socket = null;
+	private ServerSocket server = null;
+	private DataInputStream in	 = null;
+
+	// constructor with port
+	public Server(int port)
+	{
+		// starts server and waits for a connection
+		try
+		{
+			server = new ServerSocket(port);
+			System.out.println("*Please wait! Server started*");
+
+			System.out.println("*Waiting for a client to respond...");
+
+			socket = server.accept();
+			System.out.println("*Client accepted*");
+
+			// takes input from the client socket
+			in = new DataInputStream(
+				new BufferedInputStream(socket.getInputStream()));
+
+			String line = "";
+
+			// reads message from client until "Over" is sent
+			while (!line.equals("Over"))
+			{
+				try
+				{
+					line = in.readUTF();
+					System.out.println(line);
+
+				}
+				catch(IOException i)
+				{
+					System.out.println(i);
+				}
+			}
+			System.out.println("Closing connection");
+
+			// close connection
+			socket.close();
+			in.close();
 		}
-	      }
-		catch (IOException ioe){
-		 System.err.println(ioe);
-		 }
-	     }
+		catch(IOException i)
+		{
+			System.out.println(i);
+		}
 	}
+
+	public static void main(String args[])
+	{
+		Server server = new Server(5000);
+	}
+}
+
